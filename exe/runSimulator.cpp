@@ -20,23 +20,12 @@ int main(int argc, char **argv)
     bool trackImages = data["trackImages"];
 
     Simulator simulator(configPath, model_path, modelTextureNameToAlignTo, trackImages, false, simulatorOutputDir, false, "", movementFactor, vocabulary_path);
-   auto simulatorThread = simulator.run();
+    auto simulatorThread = simulator.run();
    //simulator.simulatorRunThread();
     while (!simulator.isReady())
     { // wait for the 3D model to load
         Sleep(1);
     }
-
-
-      //  Sleep(1);
-    //}
-    std::cout << "to stop press k" << std::endl;
-    std::cout << "to stop tracking press t" << std::endl;
-    std::cout << "to save map point press m" << std::endl;
-    std::cout << "waiting for key press to start scanning " << std::endl
-              << std::endl;
-    std::cin.get();
-    simulator.setTrack(true);
 
     auto lastKeyFrame = simulator.GetSLAM()->GetTracker()->getLastKeyFrame();
     auto currentPoints = lastKeyFrame->GetMapPoints();
@@ -45,27 +34,9 @@ int main(int argc, char **argv)
     {
         points.emplace_back(ORB_SLAM2::Converter::toVector3d(point->GetWorldPos()));
     }
+
     wallHandle wall;
     wall.wallDetector(points);
-
-    int currentYaw = 0;
-    int angle = 10;
-    cv::Mat currentLocation;
-    for (int i = 0; i < std::ceil(360 / angle); i++)
-    {
-        std::string c = "forward 0.5";
-        simulator.command(c);
-        currentLocation = simulator.getCurrentLocation();
-        c = "back 0.5";
-        simulator.command(c);
-        currentLocation = simulator.getCurrentLocation();
-        c = "cw " + std::to_string(angle);
-        simulator.command(c);
-        currentLocation = simulator.getCurrentLocation();
-    }
-    auto scanMap = simulator.getCurrentMap();
-
-   
 
     //simulatorThread.join();
 }

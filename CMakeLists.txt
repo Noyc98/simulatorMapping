@@ -16,9 +16,7 @@ find_package(PythonLibs REQUIRED)
 find_package(Threads REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system serialization)
 find_package(OpenCV REQUIRED)
-#find_package(gsl REQUIRED)
 add_subdirectory(Thirdparty)
-#add_subdirectory(tools/wallDetector)
 find_package(Pangolin REQUIRED PATHS "${CMAKE_CURRENT_SOURCE_DIR}/Thirdparty/Pangolin")
 
 include_directories(

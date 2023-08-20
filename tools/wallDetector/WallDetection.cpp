@@ -1,6 +1,4 @@
 #include "WallDetection.h"
-#include <gsl/statistics/gsl_statistics.h>
-#include <gsl/cdf/gsl_cdf.h>
 
 bool wallHandle::isNormallyDistributed(const std::vector<double>& data) {
     double significance_level = 0.05;
