@@ -26,6 +26,10 @@ int main(int argc, char **argv)
     { // wait for the 3D model to load
         Sleep(1);
     }
+
+
+      //  Sleep(1);
+    //}
     std::cout << "to stop press k" << std::endl;
     std::cout << "to stop tracking press t" << std::endl;
     std::cout << "to save map point press m" << std::endl;
@@ -33,6 +37,17 @@ int main(int argc, char **argv)
               << std::endl;
     std::cin.get();
     simulator.setTrack(true);
+
+    auto lastKeyFrame = simulator.GetSLAM()->GetTracker()->getLastKeyFrame();
+    auto currentPoints = lastKeyFrame->GetMapPoints();
+    std::vector<Eigen::Vector3d> points;
+    for (auto point : currentPoints)
+    {
+        points.emplace_back(ORB_SLAM2::Converter::toVector3d(point->GetWorldPos()));
+    }
+    wallHandle wall;
+    wall.wallDetector(points);
+
     int currentYaw = 0;
     int angle = 10;
     cv::Mat currentLocation;
@@ -49,6 +64,8 @@ int main(int argc, char **argv)
         currentLocation = simulator.getCurrentLocation();
     }
     auto scanMap = simulator.getCurrentMap();
+
+   
 
     //simulatorThread.join();
 }
