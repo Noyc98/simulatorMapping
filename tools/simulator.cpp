@@ -21,7 +21,7 @@ Simulator::Simulator(std::string ORBSLAMConfigFile, std::string model_path, std:
                                             movementFactor(movementFactor), modelPath(model_path), modelTextureNameToAlignTo(modelTextureNameToAlignTo),
                                             isSaveMap(saveMap),
                                             trackImages(trackImages), cull_backfaces(false),
-                                            viewportDesiredSize(640, 480)
+                                            viewportDesiredSize(640, 480),isLocolaized(false)
 {
     cv::FileStorage fSettings(ORBSLAMConfigFile, cv::FileStorage::READ);
 
@@ -197,7 +197,7 @@ void Simulator::simulatorRunThread()
                     orbExtractor->operator()(img, cv::Mat(), pts, mDescriptors);
                     Tcw = SLAM->TrackMonocular(mDescriptors, pts, timestamp);
                 }
-
+                isLocolaized = SLAM->GetTracker()->mState == SLAM->GetTracker()->OK;
                 locationLock.unlock();
             }
             

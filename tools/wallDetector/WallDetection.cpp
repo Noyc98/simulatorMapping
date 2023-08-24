@@ -91,6 +91,21 @@ double wallHandle::angleBetweenPlanes(Eigen::Vector3d normalVector)
     return degrees_angle;
 }
 
+
+void normalizeVector(std::vector<double>& vec) {
+    // Find the minimum and maximum values in the vector
+    double minVal = *std::min_element(vec.begin(), vec.end());
+    double maxVal = *std::max_element(vec.begin(), vec.end());
+
+    // Normalize the vector between 0 and 1
+    double range = maxVal - minVal;
+    if (range > 0.0) {
+        for (double& value : vec) {
+            value = (value - minVal) / range;
+        }
+    }
+}
+
 /* Function that given points - decides whether they are a wall
  input:
        vector<Eigen::Vector3d> points
@@ -106,12 +121,16 @@ bool wallHandle::wallDetector(vector <Eigen::Vector3d>& points)
     for (Eigen::Vector3d point : points) {
         z_cord.push_back(point.z());
     }
-    if (!isNormallyDistributed(z_cord))
+
+    // Normalize z_cord values between 0 and 1
+    normalizeVector(z_cord);
+
+   /* if (!isNormallyDistributed(z_cord))
     {
-        std::cout << "is not a wall" << std::endl;
+        std::cout << "is not a wall-1" << std::endl;
         is_wall = false;
         return is_wall;
-    }
+    }*/
 
     // Find the plane that minimizes the distance to the points
     Eigen::Vector4d plane = findMinimizingPlane(points);
@@ -119,14 +138,14 @@ bool wallHandle::wallDetector(vector <Eigen::Vector3d>& points)
 
     // Find the angle between the plane and XZ-plane
     double angle_between_plane_and_XZplane = angleBetweenPlanes(plane_normal);
-
+    std::cout << "Angle between minimize plane and XZplane: " << angle_between_plane_and_XZplane << std::endl;
     if (angle_between_plane_and_XZplane >= 88 && angle_between_plane_and_XZplane <= 92)
     {
-        std::cout << "is a wall" << std::endl;
+        std::cout << "It is a wall!-2" << std::endl;
         is_wall = true;
     }
     else {
-        std::cout << "is not a wall" << std::endl;
+        std::cout << "It is not a wall!-3" << std::endl;
         is_wall = false;
     }
     return is_wall;

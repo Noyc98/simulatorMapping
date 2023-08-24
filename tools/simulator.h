@@ -117,6 +117,8 @@ public:
     *
     */
    void setTrack(bool value) { track = value; }
+   bool getStopFlag() { return stopFlag; }
+   bool getIsLocolaized() { return isLocolaized; }
  void simulatorRunThread();
  std::shared_ptr<ORB_SLAM2::System> GetSLAM() { return SLAM; }
 private:
@@ -145,7 +147,7 @@ private:
    std::string simulatorOutputDir;
    bool stopFlag;
    bool ready;
-
+   bool isLocolaized;
    bool saveMapSignal;
    bool track;
    double movementFactor{};
