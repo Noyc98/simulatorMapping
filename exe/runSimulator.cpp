@@ -3,6 +3,27 @@
 //
 #include "simulator.h"
 #include "include/Auxiliary.h"
+
+void goBack(wallHandle wall, vector <Eigen::Vector3d>& points, Simulator& simulator)
+{
+    cv::Mat current_location_mat = simulator.getCurrentLocation();
+    Eigen::Vector3d current_location = Eigen::Vector3d(current_location_mat.at<double>(0, 3), current_location_mat.at<double>(1, 3), current_location_mat.at<double>(2, 3));
+    
+    double average_x = wall.getAverageCord(0, points);
+    double average_y = wall.getAverageCord(1, points);
+    double average_z = wall.getAverageCord(2, points);
+    Eigen::Vector3d average_point = Eigen::Vector3d(average_x, average_y, average_z);
+
+    // Euclidean distance
+    double distance = (current_location - average_point).norm();
+    
+    if (distance <= 0.1)
+    {
+        std::string c = "back 0.5";
+        simulator.command(c);
+    }
+}
+
 void wallDetector(Simulator &simulator) {
     while (!simulator.getStopFlag())
     {
@@ -31,6 +52,7 @@ void wallDetector(Simulator &simulator) {
         bool isWall = wall.wallDetector(points);
         if (isWall) {
             std::cout << "It is a wall!" << std::endl;
+            goBack(wall, points, simulator);
         }
         else {
             std::cout << "It is not a wall!" << std::endl;
@@ -38,6 +60,7 @@ void wallDetector(Simulator &simulator) {
         Sleep(1000); // Sleep for 1 second
     }
 }
+
 int main(int argc, char** argv)
 {
     std::ifstream programData(argv[1]);
@@ -63,8 +86,10 @@ int main(int argc, char** argv)
 
     std::cin.get();
     std::thread detectionThread(wallDetector,std::ref(simulator));
+
+
    
-    simulator.setTrack(true);
+   /* simulator.setTrack(true);
     int currentYaw = 0;
     int angle = 10;
     cv::Mat currentLocation;
@@ -76,11 +101,12 @@ int main(int argc, char** argv)
         c = "back 0.5";
         simulator.command(c);
         currentLocation = simulator.getCurrentLocation();
+        std::cout << "currentLocation: " << currentLocation << std::endl;
         c = "cw " + std::to_string(angle);
         simulator.command(c);
         currentLocation = simulator.getCurrentLocation();
     }
-    auto scanMap = simulator.getCurrentMap();
+    auto scanMap = simulator.getCurrentMap();*/
 
     simulatorThread.join();
 }

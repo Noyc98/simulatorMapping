@@ -18,13 +18,23 @@ using namespace std;
 
 class wallHandle {
 public:
+	double computeMean(const std::vector<double> value);
+
+	double computeStdDeviation(const std::vector<double> values, double mean);
+
+	std::vector<double> filterNumbersByStdDeviation(const std::vector<double> numbers);
+
 	bool isNormallyDistributed(const std::vector<double>& data);
 
 	Eigen::Vector4d findMinimizingPlane(const vector<Eigen::Vector3d>& points);
 
-	double angleBetweenPlanes(Eigen::Vector3d normalVector);
+	double angleBetweenPlanes(Eigen::Vector3d firstNormalVector, Eigen::Vector3d SecNormalVector);
+
+	void normalizeVector(std::vector<double>& vec);
 
 	bool wallDetector(vector <Eigen::Vector3d>& points);
+
+	double getAverageCord(int index, vector <Eigen::Vector3d>& points);
 
 };
 

@@ -1,5 +1,43 @@
 #include "WallDetection.h"
 
+
+
+double wallHandle::computeMean(const std::vector<double> value)
+{
+    double sum = 0;
+    for (auto e : value) { sum += e; }
+    return sum / value.size();
+}
+
+double wallHandle::computeStdDeviation(const std::vector<double> values, double mean)
+{
+    double varianceSum = 0;
+    for (auto value : values) 
+    { 
+        varianceSum += (value - mean) * (value - mean); 
+    }
+    double variance = varianceSum / values.size();
+    return sqrt(variance);
+}
+
+std::vector<double> wallHandle::filterNumbersByStdDeviation(const std::vector<double> numbers)
+{
+    double mean = computeMean(numbers);
+    double stdDev = computeStdDeviation(numbers, mean);
+
+    // Create a new group for filtered numbers
+    std::vector<double> filteredNumbers;
+
+    // Filter numbers within ±2 standard deviations
+    for (double num : numbers) {
+        if (std::abs(num - mean) <= 2 * stdDev) {
+            filteredNumbers.push_back(num);
+        }
+    }
+
+    return filteredNumbers;
+}
+
 bool wallHandle::isNormallyDistributed(const std::vector<double>& data) {
     double significance_level = 0.05;
     if (data.empty()) {
@@ -74,14 +112,11 @@ Eigen::Vector4d wallHandle::findMinimizingPlane(const vector<Eigen::Vector3d>& p
  output:
         double    degrees_angle (in degrees)   
 */
-double wallHandle::angleBetweenPlanes(Eigen::Vector3d normalVector)
+double wallHandle::angleBetweenPlanes(Eigen::Vector3d firstNormalVector, Eigen::Vector3d SecNormalVector = Eigen::Vector3d(0, 1, 0))
 {
-    // Normal vector of the X-Z plane
-    Eigen::Vector3d xzPlaneNormal = Eigen::Vector3d(0, 1, 0); 
-
-    double dot_prod = (normalVector[0] * xzPlaneNormal[0]) + (normalVector[1] * xzPlaneNormal[1]) + (normalVector[2] * xzPlaneNormal[2]);
-    double mag1 = sqrt((normalVector[0] * normalVector[0]) + (normalVector[1] * normalVector[1]) + (normalVector[2] * normalVector[2]));
-    double mag2 = sqrt((xzPlaneNormal[0] * xzPlaneNormal[0]) + (xzPlaneNormal[1] * xzPlaneNormal[1]) + (xzPlaneNormal[2] * xzPlaneNormal[2]));
+    double dot_prod = (firstNormalVector[0] * SecNormalVector[0]) + (firstNormalVector[1] * SecNormalVector[1]) + (firstNormalVector[2] * SecNormalVector[2]);
+    double mag1 = sqrt((firstNormalVector[0] * firstNormalVector[0]) + (firstNormalVector[1] * firstNormalVector[1]) + (firstNormalVector[2] * firstNormalVector[2]));
+    double mag2 = sqrt((SecNormalVector[0] * SecNormalVector[0]) + (SecNormalVector[1] * SecNormalVector[1]) + (SecNormalVector[2] * SecNormalVector[2]));
 
     double cos_angle = dot_prod / (mag1 * mag2);
     double radian_angle = acos(cos_angle);
@@ -92,7 +127,7 @@ double wallHandle::angleBetweenPlanes(Eigen::Vector3d normalVector)
 }
 
 
-void normalizeVector(std::vector<double>& vec) {
+void wallHandle::normalizeVector(std::vector<double>& vec) {
     // Find the minimum and maximum values in the vector
     double minVal = *std::min_element(vec.begin(), vec.end());
     double maxVal = *std::max_element(vec.begin(), vec.end());
@@ -141,15 +176,24 @@ bool wallHandle::wallDetector(vector <Eigen::Vector3d>& points)
     std::cout << "Angle between minimize plane and XZplane: " << angle_between_plane_and_XZplane << std::endl;
     if (angle_between_plane_and_XZplane >= 88 && angle_between_plane_and_XZplane <= 92)
     {
-        std::cout << "It is a wall!-2" << std::endl;
         is_wall = true;
     }
     else {
-        std::cout << "It is not a wall!-3" << std::endl;
         is_wall = false;
     }
     return is_wall;
 }
+
+double wallHandle::getAverageCord(int index, vector<Eigen::Vector3d>& points)
+{
+    std::vector<double> cord;
+    for (Eigen::Vector3d point : points) {
+        cord.push_back(point[index]);
+    }
+    
+    return computeMean(cord);
+}
+
 
 //
 //int main() 
