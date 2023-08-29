@@ -166,10 +166,10 @@ Eigen::Vector3d wallHandle::normalizePoint(Eigen::Vector3d& point) {
  output:
         bool  is_wall
 */
-bool wallHandle::wallDetector(vector <Eigen::Vector3d>& points, double stdWallDetector, vector <Eigen::Vector3d>& filtered_points)
+bool wallHandle::wallDetector(vector <Eigen::Vector3d>& points, double stdWallDetector, vector <Eigen::Vector3d>& normalize_points)
 {
     bool is_wall = false;
-    vector<Eigen::Vector3d> normalize_points;
+
     // Normalize points values between 0 and 1
     for (auto point : points)
     {
@@ -180,9 +180,8 @@ bool wallHandle::wallDetector(vector <Eigen::Vector3d>& points, double stdWallDe
     for (Eigen::Vector3d point : points) {
         z_cord.push_back(point.z());
     }
-
-    filtered_points = filterNumbersByStdDeviation(points, z_cord, stdWallDetector);
-    
+    vector<Eigen::Vector3d> filteredPoints = filterNumbersByStdDeviation(points, z_cord, stdWallDetector);
+    normalize_points = filteredPoints;
    /*if (!isNormallyDistributed(z_cord))
     {
         std::cout << "is not a wall-1" << std::endl;
@@ -191,7 +190,7 @@ bool wallHandle::wallDetector(vector <Eigen::Vector3d>& points, double stdWallDe
     }*/
 
     // Find the plane that minimizes the distance to the points
-    Eigen::Vector4d plane = findMinimizingPlane(filtered_points);
+    Eigen::Vector4d plane = findMinimizingPlane(filteredPoints);
     Eigen::Vector3d plane_normal = Eigen::Vector3d(plane[0], plane[1], plane[2]);
 
     // Find the angle between the plane and XZ-plane

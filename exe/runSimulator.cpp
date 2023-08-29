@@ -8,7 +8,6 @@ void goBack(wallHandle& wall, vector <Eigen::Vector3d> points, Simulator& simula
 {
     cv::Mat current_location_mat = simulator.getCurrentLocation();
     Eigen::Vector3d current_location = Eigen::Vector3d(current_location_mat.at<float>(0, 3), current_location_mat.at<float>(1, 3), current_location_mat.at<float>(2, 3));
-    current_location = wall.normalizePoint(current_location);
 
     double average_x = wall.getAverageCord(0, points);
     double average_y = wall.getAverageCord(1, points);
@@ -16,14 +15,14 @@ void goBack(wallHandle& wall, vector <Eigen::Vector3d> points, Simulator& simula
     Eigen::Vector3d average_point = Eigen::Vector3d(average_x, average_y, average_z);
 
     // Euclidean distance
-    double dx = std::abs(current_location[0] - average_point[0]);
-    double dy = std::abs(current_location[1] - average_point[1]);
-    double dz = std::abs(current_location[2] - average_point[2]);
+    double dx = average_point[0]- current_location[0];
+    double dy = average_point[1] - current_location[1];
+    double dz = average_point[2] - current_location[2];
 
-    double distance =  std::sqrt(dx * dx + dy * dy + dz * dz);
+    double distance =  std::sqrt((dx * dx) + (dy * dy) + (dz * dz));
     //double distance = (current_location - average_point).norm();
     
-    if (distance <= 0.5)
+    if (distance >= 1.5)
     {
         std::string c = "back 0.5";
         simulator.command(c);
@@ -54,12 +53,12 @@ void wallDetector(Simulator &simulator, double stdWallDetector) {
         for (const auto& point : points) {
             std::cout << point.z() << ","<< std::endl;
         }*/
-        vector <Eigen::Vector3d> normalize_points;
+        vector <Eigen::Vector3d> fillter;
         wallHandle wall;
-        bool isWall = wall.wallDetector(points, stdWallDetector, normalize_points);
+        bool isWall = wall.wallDetector(points, stdWallDetector, fillter);
         if (isWall) {
             std::cout << "It is a wall!" << std::endl;
-            goBack(wall, normalize_points, simulator);
+            goBack(wall, fillter, simulator);
         }
         else {
             std::cout << "It is not a wall!" << std::endl;
