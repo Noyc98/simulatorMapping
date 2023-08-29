@@ -39,6 +39,7 @@
   "framesOutput": "/home/liam/Downloads/frames/",
   "frameNumber": 99,
   "useLabICP": true,
-  "trackImages": true
+  "trackImages": true,
+  "stdWallDetector": 2
 }
 

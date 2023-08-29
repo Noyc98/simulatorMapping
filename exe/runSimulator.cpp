@@ -4,27 +4,34 @@
 #include "simulator.h"
 #include "include/Auxiliary.h"
 
-void goBack(wallHandle wall, vector <Eigen::Vector3d>& points, Simulator& simulator)
+void goBack(wallHandle& wall, vector <Eigen::Vector3d> points, Simulator& simulator)
 {
     cv::Mat current_location_mat = simulator.getCurrentLocation();
-    Eigen::Vector3d current_location = Eigen::Vector3d(current_location_mat.at<double>(0, 3), current_location_mat.at<double>(1, 3), current_location_mat.at<double>(2, 3));
-    
+    Eigen::Vector3d current_location = Eigen::Vector3d(current_location_mat.at<float>(0, 3), current_location_mat.at<float>(1, 3), current_location_mat.at<float>(2, 3));
+    current_location = wall.normalizePoint(current_location);
+
     double average_x = wall.getAverageCord(0, points);
     double average_y = wall.getAverageCord(1, points);
     double average_z = wall.getAverageCord(2, points);
     Eigen::Vector3d average_point = Eigen::Vector3d(average_x, average_y, average_z);
 
     // Euclidean distance
-    double distance = (current_location - average_point).norm();
+    double dx = std::abs(current_location[0] - average_point[0]);
+    double dy = std::abs(current_location[1] - average_point[1]);
+    double dz = std::abs(current_location[2] - average_point[2]);
+
+    double distance =  std::sqrt(dx * dx + dy * dy + dz * dz);
+    //double distance = (current_location - average_point).norm();
     
-    if (distance <= 0.1)
+    if (distance <= 0.5)
     {
         std::string c = "back 0.5";
         simulator.command(c);
+        std::cout << "Go Back!" << std::endl;
     }
 }
 
-void wallDetector(Simulator &simulator) {
+void wallDetector(Simulator &simulator, double stdWallDetector) {
     while (!simulator.getStopFlag())
     {
         if (!simulator.getIsLocolaized())
@@ -47,12 +54,12 @@ void wallDetector(Simulator &simulator) {
         for (const auto& point : points) {
             std::cout << point.z() << ","<< std::endl;
         }*/
-
+        vector <Eigen::Vector3d> normalize_points;
         wallHandle wall;
-        bool isWall = wall.wallDetector(points);
+        bool isWall = wall.wallDetector(points, stdWallDetector, normalize_points);
         if (isWall) {
             std::cout << "It is a wall!" << std::endl;
-            goBack(wall, points, simulator);
+            goBack(wall, normalize_points, simulator);
         }
         else {
             std::cout << "It is not a wall!" << std::endl;
@@ -75,6 +82,7 @@ int main(int argc, char** argv)
     std::string simulatorOutputDir = data["simulatorOutputDir"];
     double movementFactor = data["movementFactor"];
     bool trackImages = data["trackImages"];
+    double stdWallDetector = data["stdWallDetector"];
 
     Simulator simulator(configPath, model_path, modelTextureNameToAlignTo, trackImages, false, simulatorOutputDir, false, "", movementFactor, vocabulary_path);
     auto simulatorThread = simulator.run();
@@ -85,7 +93,7 @@ int main(int argc, char** argv)
     }
 
     std::cin.get();
-    std::thread detectionThread(wallDetector,std::ref(simulator));
+    std::thread detectionThread(wallDetector,std::ref(simulator), stdWallDetector);
 
 
    

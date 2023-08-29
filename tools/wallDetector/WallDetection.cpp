@@ -6,7 +6,7 @@ double wallHandle::computeMean(const std::vector<double> value)
 {
     double sum = 0;
     for (auto e : value) { sum += e; }
-    return sum / value.size();
+    return sum / double(value.size());
 }
 
 double wallHandle::computeStdDeviation(const std::vector<double> values, double mean)
@@ -16,11 +16,11 @@ double wallHandle::computeStdDeviation(const std::vector<double> values, double 
     { 
         varianceSum += (value - mean) * (value - mean); 
     }
-    double variance = varianceSum / values.size();
+    double variance = varianceSum / double(values.size());
     return sqrt(variance);
 }
 
-std::vector<double> wallHandle::filterNumbersByStdDeviation(const std::vector<double> numbers)
+/*std::vector<double> wallHandle::filterNumbersByStdDeviation(const std::vector<double> numbers)
 {
     double mean = computeMean(numbers);
     double stdDev = computeStdDeviation(numbers, mean);
@@ -30,12 +30,30 @@ std::vector<double> wallHandle::filterNumbersByStdDeviation(const std::vector<do
 
     // Filter numbers within ±2 standard deviations
     for (double num : numbers) {
-        if (std::abs(num - mean) <= 2 * stdDev) {
+        if (std::abs(num - mean) <= 1 * stdDev) {
             filteredNumbers.push_back(num);
         }
     }
 
     return filteredNumbers;
+}*/
+
+vector<Eigen::Vector3d> wallHandle::filterNumbersByStdDeviation(vector<Eigen::Vector3d>& points, const std::vector<double> numbers, double stdWallDetector)
+{
+    double mean = computeMean(numbers);
+    double stdDev = computeStdDeviation(numbers, mean);
+
+    // Create a new group for filtered points
+    vector<Eigen::Vector3d> filteredPoints;
+
+    // Filter numbers within ±2 standard deviations
+    for (auto i = 0; i < numbers.size(); i++) {
+        if (std::abs(numbers[i] - mean) <= stdWallDetector * stdDev) {
+            filteredPoints.push_back(points[i]);
+        }
+    }
+
+    return filteredPoints;
 }
 
 bool wallHandle::isNormallyDistributed(const std::vector<double>& data) {
@@ -126,19 +144,13 @@ double wallHandle::angleBetweenPlanes(Eigen::Vector3d firstNormalVector, Eigen::
     return degrees_angle;
 }
 
-
-void wallHandle::normalizeVector(std::vector<double>& vec) {
-    // Find the minimum and maximum values in the vector
-    double minVal = *std::min_element(vec.begin(), vec.end());
-    double maxVal = *std::max_element(vec.begin(), vec.end());
-
-    // Normalize the vector between 0 and 1
-    double range = maxVal - minVal;
-    if (range > 0.0) {
-        for (double& value : vec) {
-            value = (value - minVal) / range;
-        }
+Eigen::Vector3d wallHandle::normalizePoint(Eigen::Vector3d& point) {
+    Eigen::Vector3d normalize_point = Eigen::Vector3d(0,0,0);
+    for (auto i = 0; i < point.size(); i++) {
+        double result = point[i] / point.norm();
+        normalize_point[i] = result;
     }
+    return normalize_point;
 }
 
 /* Function that given points - decides whether they are a wall
@@ -148,19 +160,23 @@ void wallHandle::normalizeVector(std::vector<double>& vec) {
  output:
         bool  is_wall
 */
-bool wallHandle::wallDetector(vector <Eigen::Vector3d>& points)
+bool wallHandle::wallDetector(vector <Eigen::Vector3d>& points, double stdWallDetector, vector <Eigen::Vector3d>& normalize_points)
 {
     bool is_wall = false;
 
-    std::vector<double> z_cord;
-    for (Eigen::Vector3d point : points) {
-        z_cord.push_back(point.z());
+    // Normalize points values between 0 and 1
+    for (auto point : points)
+    {
+        normalize_points.push_back(normalizePoint(point));
     }
 
-    // Normalize z_cord values between 0 and 1
-    normalizeVector(z_cord);
+    std::vector<double> z_cord;
+    for (Eigen::Vector3d point : normalize_points) {
+        z_cord.push_back(point.z());
+    }
+    vector<Eigen::Vector3d> filteredPoints = filterNumbersByStdDeviation(points, z_cord, stdWallDetector);
 
-   /* if (!isNormallyDistributed(z_cord))
+   /*if (!isNormallyDistributed(z_cord))
     {
         std::cout << "is not a wall-1" << std::endl;
         is_wall = false;
@@ -168,7 +184,7 @@ bool wallHandle::wallDetector(vector <Eigen::Vector3d>& points)
     }*/
 
     // Find the plane that minimizes the distance to the points
-    Eigen::Vector4d plane = findMinimizingPlane(points);
+    Eigen::Vector4d plane = findMinimizingPlane(filteredPoints);
     Eigen::Vector3d plane_normal = Eigen::Vector3d(plane[0], plane[1], plane[2]);
 
     // Find the angle between the plane and XZ-plane
@@ -193,6 +209,7 @@ double wallHandle::getAverageCord(int index, vector<Eigen::Vector3d>& points)
     
     return computeMean(cord);
 }
+
 
 
 //
