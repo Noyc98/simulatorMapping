@@ -40,6 +40,6 @@
   "frameNumber": 99,
   "useLabICP": true,
   "trackImages": true,
-  "stdWallDetector": 2
+  "stdWallDetector": 1.5
 }
 

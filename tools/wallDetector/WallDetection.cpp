@@ -53,6 +53,7 @@ double wallHandle::computeStdDeviation(const std::vector<double> values, double 
 */
 vector<Eigen::Vector3d> wallHandle::filterNumbersByStdDeviation(vector<Eigen::Vector3d>& points, const std::vector<double> numbers, double std_wall_detector)
 {
+    // Calculate mean and standard deviation
     double mean = computeMean(numbers);
     double std_deviation = computeStdDeviation(numbers, mean);
 
@@ -119,21 +120,21 @@ vector<Eigen::Vector3d> wallHandle::filterNumbersByStdDeviation(vector<Eigen::Ve
 */
 Eigen::Vector4d wallHandle::findMinimizingPlane(const vector<Eigen::Vector3d>& points) 
 {
-    Eigen::Matrix<double, Eigen::Dynamic, 3> A(points.size(), 3);
+    Eigen::Matrix<double, Eigen::Dynamic, 3> matrix(points.size(), 3);
 
-    // Fill the matrix A with points
+    // Fill the matrix with points
     for (size_t i = 0; i < points.size(); ++i) {
-        A.row(i) = points[i].transpose();
+        matrix.row(i) = points[i].transpose();
     }
 
     // Compute the centroid of the points
-    Eigen::Vector3d centroid = A.colwise().mean();
+    Eigen::Vector3d centroid = matrix.colwise().mean();
 
     // Subtract the centroid from each point to center them around the origin
-    A.rowwise() -= centroid.transpose();
+    matrix.rowwise() -= centroid.transpose();
 
-    // Compute the singular value decomposition (SVD) of A
-    Eigen::JacobiSVD<Eigen::MatrixXd> svd(A, Eigen::ComputeThinU | Eigen::ComputeThinV);
+    // Compute the singular value decomposition (SVD) of the matrix
+    Eigen::JacobiSVD<Eigen::MatrixXd> svd(matrix, Eigen::ComputeThinU | Eigen::ComputeThinV);
 
     // The last column of V contains the normal vector of the plane
     Eigen::Vector3d normal = svd.matrixV().col(2);
@@ -208,6 +209,7 @@ bool wallHandle::wallDetector(vector <Eigen::Vector3d>& points, double std_wall_
 {
     bool is_wall = false;
     vector<Eigen::Vector3d> normalize_points;
+   
     // Normalize points values between 0 and 1
     for (auto point : points)
     {

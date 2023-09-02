@@ -6,22 +6,41 @@
 
 void goBack(wallHandle& wall, vector <Eigen::Vector3d> points, Simulator& simulator)
 {
+    cv::Mat camera_center_mat = simulator.GetSLAM()->GetTracker()->getLastKeyFrame()->GetCameraCenter();
     cv::Mat current_location_mat = simulator.getCurrentLocation();
+
+    /*float x = current_location_mat.at<float>(0, 3) - camera_center_mat.at<float>(0,0);
+    float y = current_location_mat.at<float>(1, 3) - camera_center_mat.at<float>(1 , 0 );
+    float z = current_location_mat.at<float>(2, 3) - camera_center_mat.at<float>(2 , 0 );*/
+
+    float x = camera_center_mat.at<float>(0,0);
+    float y = camera_center_mat.at<float>(1 , 0 );
+    float z = camera_center_mat.at<float>(2 , 0 );
+    Eigen::Vector3d camera_center = Eigen::Vector3d(x, y, z);
     Eigen::Vector3d current_location = Eigen::Vector3d(current_location_mat.at<float>(0, 3), current_location_mat.at<float>(1, 3), current_location_mat.at<float>(2, 3));
 
-    double average_x = wall.getAverageCord(0, points);
-    double average_y = wall.getAverageCord(1, points);
-    double average_z = wall.getAverageCord(2, points);
+    for (auto point : points) {
+        point -= camera_center;
+    }
+    //cv::Mat CameraCenter = simulator.GetSLAM()->GetTracker()->getLastKeyFrame()->GetCameraCenter();
+
+    //cv::Mat current_location_mat = simulator.getCurrentLocation();
+    //Eigen::Vector3d current_location = Eigen::Vector3d(current_location_mat.at<float>(0, 3), current_location_mat.at<float>(1, 3), current_location_mat.at<float>(2, 3));
+    //current_location_mat -= CameraCenter;
+    
+    float average_x = wall.getAverageCord(0, points);
+    float average_y = wall.getAverageCord(1, points);
+    float average_z = wall.getAverageCord(2, points);
     Eigen::Vector3d average_point = Eigen::Vector3d(average_x, average_y, average_z);
 
     // Euclidean distance
-    double dx = average_point[0]- current_location[0];
+    float dx = average_point[0]- current_location[0];
     //double dy = average_point[1] - current_location[1];
-    double dz = average_point[2] - current_location[2];
+    float dz = average_point[2] - current_location[2];
 
-    double distance =  std::sqrt((dx * dx) + (dz * dz));
-    //double distance = (current_location - average_point).norm();
-    
+    float distance =  std::sqrt((dx * dx) + (dz * dz));
+    ////double distance = (current_location - average_point).norm();
+    //
     if (distance >= 1.5)
     {
         std::string c = "back 0.5";
@@ -56,11 +75,13 @@ void wallDetector(Simulator &simulator, double std_wall_detector) {
         vector <Eigen::Vector3d> filltered_points;
         wallHandle wall;
         bool isWall = wall.wallDetector(points, std_wall_detector, filltered_points);
-        if (isWall) {
+        if (isWall) 
+        {
             std::cout << "It is a wall!" << std::endl;
             goBack(wall, filltered_points, simulator);
         }
-        else {
+        else 
+        {
             std::cout << "It is not a wall!" << std::endl;
         }
         Sleep(1000); // Sleep for 1 second
