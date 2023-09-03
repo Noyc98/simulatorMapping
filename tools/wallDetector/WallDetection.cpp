@@ -1,6 +1,8 @@
 #include "WallDetection.h"
 
-/* 
+
+// **** Math Functions **** //
+/*
     Compute the mean of a vector
  Input:
        const std::vector<double>    value
@@ -11,8 +13,8 @@
 double wallHandle::computeMean(const std::vector<double> values)
 {
     double sum = 0;
-    for (auto val : values) 
-    { 
+    for (auto val : values)
+    {
         sum += val;
     }
     return sum / double(values.size());
@@ -30,17 +32,42 @@ double wallHandle::computeMean(const std::vector<double> values)
 double wallHandle::computeStdDeviation(const std::vector<double> values, double mean)
 {
     double variance_sum = 0;
-
-    for (auto value : values) 
-    { 
-        variance_sum += (value - mean) * (value - mean); 
+    for (auto value : values)
+    {
+        variance_sum += (value - mean) * (value - mean);
     }
-
     double variance = variance_sum / double(values.size());
 
     return sqrt(variance);
 }
 
+/*
+    Function that calculate the normal value of point
+ Input:
+       Eigen::Vector3d&     point
+
+ Output:
+        Eigen::Vector3d     normalize_point
+*/
+Eigen::Vector3d wallHandle::normalizePoint(Eigen::Vector3d& point)
+{
+    Eigen::Vector3d normalize_point = Eigen::Vector3d(0, 0, 0);
+    /*Normalize the vector with norm()
+    for (auto i = 0; i < point.size(); i++) {
+        double result = point[i] / point.norm();
+        normalize_point[i] = result;
+    }*/
+
+    // Normalize the vector between 0 and 1 with mam-min value of double
+    for (auto i = 0; i < point.size(); i++) {
+        double result = (point[i] - DBL_MIN) / (DBL_MAX - DBL_MIN);
+        normalize_point[i] = result;
+    }
+    return normalize_point;
+}
+
+
+// **** Help Functions for Calculate **** //
 /*
     3D vector of points filltered by std_wall_detector to ignore outliers
  Input:
@@ -70,47 +97,47 @@ vector<Eigen::Vector3d> wallHandle::filterNumbersByStdDeviation(vector<Eigen::Ve
     return filtered_points;
 }
 
+///*
+//    Checks if data is normally distributed
+// Input:
+//       const std::vector<double>&       data
+//
+// Output:
+//        bool                            test_statistic <= critical_value
+//*/
+//bool wallHandle::isNormallyDistributed(const std::vector<double>& data) {
+//    double significance_level = 0.05;
+//    if (data.empty()) {
+//        // Empty data vector, cannot perform the test
+//        return false;
+//    }
+//
+//    // Sort the data vector in ascending order
+//    std::vector<double> sorted_data = data;
+//    std::sort(sorted_data.begin(), sorted_data.end());
+//
+//    // Calculate the mean and standard deviation of the data
+//    double mean = gsl_stats_mean(&sorted_data[0], 1, sorted_data.size());
+//    double std_deviation = gsl_stats_sd(&sorted_data[0], 1, sorted_data.size());
+//
+//    // Calculate the test statistic (D) and p-value
+//    double test_statistic = 0.0;
+//    for (size_t i = 0; i < sorted_data.size(); ++i) {
+//        double F_obs = gsl_cdf_ugaussian_P((sorted_data[i] - mean) / std_deviation);
+//        double F_exp = (i + 1.0) / sorted_data.size();
+//        double diff = std::abs(F_obs - F_exp);
+//        if (diff > test_statistic) {
+//            test_statistic = diff;
+//        }
+//    }
+//
+//    // Calculate the critical value for the given significance level and sample size
+//    double critical_value = gsl_cdf_ugaussian_Pinv(1.0 - significance_level / 2.0) / std::sqrt(sorted_data.size());
+//
+//    return test_statistic <= critical_value;
+//}
+
 /*
-    Checks if data is normally distributed
- Input:
-       const std::vector<double>&       data
-
- Output:
-        bool                            test_statistic <= critical_value
-*/
-/*bool wallHandle::isNormallyDistributed(const std::vector<double>& data) {
-    double significance_level = 0.05;
-    if (data.empty()) {
-        // Empty data vector, cannot perform the test
-        return false;
-    }
-
-    // Sort the data vector in ascending order
-    std::vector<double> sorted_data = data;
-    std::sort(sorted_data.begin(), sorted_data.end());
-
-    // Calculate the mean and standard deviation of the data
-    double mean = gsl_stats_mean(&sorted_data[0], 1, sorted_data.size());
-    double std_deviation = gsl_stats_sd(&sorted_data[0], 1, sorted_data.size());
-
-    // Calculate the test statistic (D) and p-value
-    double test_statistic = 0.0;
-    for (size_t i = 0; i < sorted_data.size(); ++i) {
-        double F_obs = gsl_cdf_ugaussian_P((sorted_data[i] - mean) / std_deviation);
-        double F_exp = (i + 1.0) / sorted_data.size();
-        double diff = std::abs(F_obs - F_exp);
-        if (diff > test_statistic) {
-            test_statistic = diff;
-        }
-    }
-
-    // Calculate the critical value for the given significance level and sample size
-    double critical_value = gsl_cdf_ugaussian_Pinv(1.0 - significance_level / 2.0) / std::sqrt(sorted_data.size());
-
-    return test_statistic <= critical_value;
-}*/
-
-/* 
     Function that find the plane that minimizes the distance to a set of points
  Input:
        const vector<Eigen::Vector3d>&       points
@@ -118,7 +145,7 @@ vector<Eigen::Vector3d> wallHandle::filterNumbersByStdDeviation(vector<Eigen::Ve
  Output:
         Eigen::Vector4d   plane equation (ax+by+cz+d=0)
 */
-Eigen::Vector4d wallHandle::findMinimizingPlane(const vector<Eigen::Vector3d>& points) 
+Eigen::Vector4d wallHandle::findMinimizingPlane(const vector<Eigen::Vector3d>& points)
 {
     Eigen::Matrix<double, Eigen::Dynamic, 3> matrix(points.size(), 3);
 
@@ -147,14 +174,14 @@ Eigen::Vector4d wallHandle::findMinimizingPlane(const vector<Eigen::Vector3d>& p
     return Eigen::Vector4d(normal.x(), normal.y(), normal.z(), d);
 }
 
-/* 
+/*
     Function that calculate the angle between 2 planes
  Input:
        Eigen::Vector3d  first_normal_vector
        Eigen::Vector3d  second_normal_vector
 
  Output:
-        double          degrees_angle  
+        double          degrees_angle
 */
 double wallHandle::angleBetweenPlanes(Eigen::Vector3d first_normal_vector, Eigen::Vector3d second_normal_vector = Eigen::Vector3d(0, 1, 0))
 {
@@ -167,35 +194,13 @@ double wallHandle::angleBetweenPlanes(Eigen::Vector3d first_normal_vector, Eigen
 
     // Convert the angle from radians to degrees
     double degrees_angle = radian_angle * (180.0 / M_PI);
-    
+
     return degrees_angle;
 }
 
+
+// **** Main Function - Wall Detector **** //
 /*
-    Function that calculate the normal value of point
- Input:
-       Eigen::Vector3d&     point
-
- Output:
-        Eigen::Vector3d     normalize_point
-*/
-Eigen::Vector3d wallHandle::normalizePoint(Eigen::Vector3d& point) 
-{
-    Eigen::Vector3d normalize_point = Eigen::Vector3d(0,0,0);
-    //for (auto i = 0; i < point.size(); i++) {
-    //    double result = point[i] / point.norm();
-    //    normalize_point[i] = result;
-    //}
-
-    // Normalize the vector between 0 and 1
-    for (auto i = 0; i < point.size(); i++) {
-        double result = (point[i] - DBL_MIN) / (DBL_MAX- DBL_MIN);
-        normalize_point[i] = result;
-    }
-    return normalize_point;
-}
-
-/* 
     Function that for given points - decides whether they are a wall
  Input:
       vector <Eigen::Vector3d>&     points
@@ -209,21 +214,22 @@ bool wallHandle::wallDetector(vector <Eigen::Vector3d>& points, double std_wall_
 {
     bool is_wall = false;
     vector<Eigen::Vector3d> normalize_points;
-   
-    // Normalize points values between 0 and 1
+
+    // Normalize points
     for (auto point : points)
     {
         normalize_points.push_back(normalizePoint(point));
     }
 
+    // Filter the points to ignore outliers
     std::vector<double> z_cord;
     for (Eigen::Vector3d point : points) {
         z_cord.push_back(point.z());
     }
-
     filtered_points = filterNumbersByStdDeviation(points, z_cord, std_wall_detector);
-    
-   /*if (!isNormallyDistributed(z_cord))
+
+    // Checks if the points is normally distributed
+    /*if (!isNormallyDistributed(z_cord))
     {
         std::cout << "is not a wall-1" << std::endl;
         is_wall = false;
@@ -237,6 +243,7 @@ bool wallHandle::wallDetector(vector <Eigen::Vector3d>& points, double std_wall_
     // Find the angle between the plane and XZ-plane
     double angle_between_plane_and_XZplane = angleBetweenPlanes(plane_normal);
     std::cout << "Angle between minimize plane and XZplane: " << angle_between_plane_and_XZplane << std::endl;
+
     if (angle_between_plane_and_XZplane >= 88 && angle_between_plane_and_XZplane <= 92)
     {
         is_wall = true;
@@ -247,6 +254,7 @@ bool wallHandle::wallDetector(vector <Eigen::Vector3d>& points, double std_wall_
     return is_wall;
 }
 
+//DELETE
 /*
     Extracts vector and compute his average
  Input:
@@ -255,13 +263,13 @@ bool wallHandle::wallDetector(vector <Eigen::Vector3d>& points, double std_wall_
 
  Output:
         double                      computeMean(cord)
-*/
+
 double wallHandle::getAverageCord(int index, vector<Eigen::Vector3d>& points)
 {
     std::vector<double> cord;
     for (Eigen::Vector3d point : points) {
         cord.push_back(point[index]);
     }
-    
+
     return computeMean(cord);
-}
+}*/
