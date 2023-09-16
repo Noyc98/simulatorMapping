@@ -1,4 +1,12 @@
-For running simulator:
+# Wall detector on simulator mapping
+
+descreption of the project: detecting a wall using...
+
+## describe the algorithm + photos
+
+## how to run the project?
+
+### For running simulator:
 
 Start with ./install.sh
 
@@ -32,3 +40,4 @@ I) Run ./mapping
 II) Click Open Simulator button when you want to and now the simulator opens in the first position you defined
 
 III) Move with moving buttons and rotate with rotate buttons
+
