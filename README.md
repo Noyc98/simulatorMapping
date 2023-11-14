@@ -19,16 +19,18 @@ Define the wall identification problem through two tests:
 2. Check that the plane of the given points is perpendicular to the Z-X plane, considering a wall perpendicular to the floor (angle range: 88-92 degrees).
 Run the code and obtain the confusion matrix:
 
- ![image](https://github.com/Noyc98/simulatorMapping/assets/110714301/ca09439a-cbb7-44d5-9992-1d25187a06fa)
+<img src="https://github.com/Noyc98/simulatorMapping/assets/110714301/ca09439a-cbb7-44d5-9992-1d25187a06fa" width="200">
 
 ### Step 3: Integration of Wall Detection Algorithm in the Simulator
 - Run the simulator.
 - Add the WallHandler class to identify walls using simulator points.
 - Discover that the initial test for wall identification by normal distribution is not relevant due to noise in orb-slam.
 - Investigate and find that the data creation test worked well because it assumed a normal distribution for the Z-axis coordinate.
-- Remove the Z-axis normal distribution test, resulting in successful and accurate wall identification:!
-- ![image](https://github.com/Noyc98/simulatorMapping/assets/110714301/7842395c-1ed0-4bd2-82a0-5c33c3cecb0c)
-![image](https://github.com/Noyc98/simulatorMapping/assets/110714301/a82bbfd0-57d7-426c-bd9c-52e43e698973)
+- Remove the Z-axis normal distribution test, resulting in successful and accurate wall identification:
+
+<img src="https://github.com/Noyc98/simulatorMapping/assets/110714301/7842395c-1ed0-4bd2-82a0-5c33c3cecb0c" width="400">
+<br>
+<img src="https://github.com/Noyc98/simulatorMapping/assets/110714301/a82bbfd0-57d7-426c-bd9c-52e43e698973" width="400">
 
 detecting a wall (depending of distance):
 ![](https://github.com/Noyc98/simulatorMapping/assets/110714301/c84bf759-5a1f-400a-a665-787bc133ce25)
@@ -67,33 +69,34 @@ detecting a wall (depending of distance):
   
   iii. Run the offline ORB-SLAM:
     
-      ```bash
-      build/offline_orb_slam
- 
+   ```bash
+   build/offline_orb_slam
+   ```
  
  ### Adjusting Simulator Settings
   1. i. Update the result directory in generalSettings.json to your desired path and name.
   
   ii. Update generalSettings.json:
   
-    - Set mapInputDir to the location where the offline result is saved.
-    - Set initial simulator position and orientation parameters:
-      - startingCameraPosX
-      - startingCameraPosY
-      - startingCameraPosZ
-      - yawRad
-      - pitchRad
-      - rollRad
+ - Set mapInputDir to the location where the offline result is saved.
+ - Set initial simulator position and orientation parameters:
+   - startingCameraPosX
+   - startingCameraPosY
+   - startingCameraPosZ
+   - yawRad
+   - pitchRad
+   - rollRad
   
   iii. Set movement and rotation scales:
   
-    - Set __movingScale__ to control movement when pressing moving buttons.
-    - Set __rotateScale__ to control rotation when using rotate buttons (in radians).
+ - Set __movingScale__ to control movement when pressing moving buttons.
+ - Set __rotateScale__ to control rotation when using rotate buttons (in radians).
  
  2. Run the mapping script to open ORB-SLAM:
  
        ```bash
        ./mapping
+       ```
  
  3. Click the "Open Simulator" button to launch the simulator in the defined initial position.
  
