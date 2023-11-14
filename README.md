@@ -1,4 +1,12 @@
-For running simulator:
+# wall detector integreted in simulator mapping
+Authors:
+
+- Michal Marom
+- Noy Cohen
+
+## Installation
+
+### For running simulator:
 
 Start with ./install.sh
 
