@@ -1,29 +1,76 @@
-# Wall detector on simulator mapping
+# wall detector integreted in simulator mapping
+Authors:
 
-descreption of the project: detecting a wall using...
+- Michal Marom
+- Noy Cohen
+
+## project flow
+
+### step 1: creating data for testing
+random 2000 points 
+ translate the project report here!
 
 ## describe the algorithm + photos
+detecting a wall (depending of distance):
+![](https://github.com/Noyc98/simulatorMapping/assets/110714301/c84bf759-5a1f-400a-a665-787bc133ce25)
+![](https://github.com/Noyc98/simulatorMapping/assets/110714301/009cd5b2-9360-4764-9719-25efae72bb28)
 
-## how to run the project?
 
-### For running simulator:
+## Installation and how to run the project?
 
-Start with ./install.sh
+### Running the Simulator
 
-After we installed the program we want to run it, this is the flow:
+1. Start by running the installation script:
 
-1. We want to run video with offline orb-slam for create for us simulator-compatible csv file.
-For doing that we need:
+   ```bash
+   ./install.sh
 
-I) cd Vocabulary; tar -xf ORBvoc.txt.tar.gz; cd ..
+2. After installing the program, follow these steps to run the simulator:
 
-II) Change in generalSettings.json: *VocabularyPath* to ${simulatorMappingDir}/Vocabulary/ORBvoc.txt, *DroneYamlPathSlam* to ${simulatorMappingDir}/config/tello_9F5EC2_640.yaml, *offlineVideoTestPath* to where the video saved and *simulatorOutputDir* to where the directory of the result will be saved
+Offline ORB-SLAM Video
+i. Extract ORB vocabulary:
 
-Note: I added some videos to the shared simulator google drive directory
+    cd Vocabulary
+    tar -xf ORBvoc.txt.tar.gz
+    cd ..
 
-III) run build/offline_orb_slam
+ii. Update generalSettings.json:
 
-2. Now we want to adjust some things:
+  - Set VocabularyPath to ${simulatorMappingDir}/Vocabulary/ORBvoc.txt
+
+  - Set DroneYamlPathSlam to ${simulatorMappingDir}/config/tello_9F5EC2_640.yaml
+
+  - Set offlineVideoTestPath to the path where the video is saved
+    
+  - Set simulatorOutputDir to the directory where the result will be saved
+
+  > Note: Sample videos are available in the shared simulator Google Drive directory.
+
+iii. Run the offline ORB-SLAM:
+  
+    ```bash
+    build/offline_orb_slam
+
+
+Adjusting Simulator Settings
+i. Update the result directory in generalSettings.json to your desired path and name.
+
+ii. Update generalSettings.json:
+
+  - Set mapInputDir to the location where the offline result is saved.
+  - Set initial simulator position and orientation parameters:
+    - startingCameraPosX
+    - startingCameraPosY
+    - startingCameraPosZ
+    - yawRad
+    - pitchRad
+    - rollRad
+
+iii. Set movement and rotation scales:
+
+  - Set __movingScale__ to control movement when pressing moving buttons.
+  - Set __rotateScale__ to control rotation when using rotate buttons (in radians).
+
 
 I) Change the result of the offline_orb_slam dir to the path and the name you want it to be
 
